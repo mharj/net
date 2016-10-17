@@ -51,30 +51,25 @@ class URL {
 		return $ins;
 	}
 	
-	private function parse(string $uri) {
-		if ( preg_match("/^(.*?):/",$uri,$match) ) {
-			$this->scheme = $match[1];
-			$uri = substr($uri, (strlen($this->scheme)+1) , strlen($uri));
+	private function parse(string $url) {
+		$data = parse_url($url);
+		if ( isset($data['scheme']) ) {
+			$this->scheme = $data['scheme'];
 		}
-		if ( preg_match("/^\/\/(.*?)(\/|$)/",$uri,$match) ) {
-			$this->authority=$match[1];
-			$uri = substr($uri, (strlen($this->authority)+2) , strlen($uri));
-			if ( preg_match("/^(.*?)@(.*?)$/",$this->authority,$sub) ) {
-				$this->authority = $sub[2];
-				$this->userInfo = $sub[1];
-			}
+		if ( isset($data['host']) ) {
+			$this->authority = $data['host'];
 		}
-		if ( preg_match("/^(.*?)($|#|\?)/",$uri,$match) ) {
-			$this->path=$match[1];
-			$uri = substr($uri, strlen($this->path) , strlen($uri));
+		if ( isset($data['user']) ) {
+			$this->userInfo = $data['user'].':'.$data['pass'];
 		}
-		if ( preg_match("/^\?(.*?)($|#)/",$uri,$match) ) {
-			$this->query=$match[1];
-			$uri = substr($uri, (strlen($this->query)+1) , strlen($uri));
+		if ( isset($data['path']) ) {
+			$this->path = $data['path'];
 		}
-		if ( preg_match("/^#(.*?)$/",$uri,$match) ) {
-			$this->fragment=$match[1];
+		if ( isset($data['query']) ) {
+			$this->query = $data['query'];
+		}
+		if ( isset($data['fragment']) ) {
+			$this->fragment = $data['fragment'];
 		}
 	}
-	
 }
