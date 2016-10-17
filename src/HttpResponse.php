@@ -13,6 +13,9 @@ class HttpResponse {
 		$this->statusCode = $statusCode;
 	}
 	
+	public function getStatusCode(): int {
+		return $this->statusCode;
+	}
 	public function setHeaders(array $headers) {
 		$this->headers = $headers;
 	}
