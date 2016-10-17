@@ -1,0 +1,17 @@
+{
+    "name": "mharj/net",
+    "description": "PHP Net wrapper library",
+    "license": "LGPL 2.1",
+    "authors": [
+        {
+            "name": "Marko Harjula"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {},
+    "autoload": {
+       "psr-4": {
+            "mharj\\net\\": "src"
+       }
+    }
+}
