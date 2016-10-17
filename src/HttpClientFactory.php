@@ -2,7 +2,11 @@
 namespace mharj\net;
 
 class HttpClientFactory {
+	private static $instance = null;
 	public static function getDefaultInstance() {
-		return new CurlHttpClient(); // atm only one
+		if ( self::$instance == null  ) {
+			self::$instance = new CurlHttpClient(); // atm only one
+		}
+		return self::$instance; 
 	}
 }
