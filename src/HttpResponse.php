@@ -2,6 +2,8 @@
 namespace mharj\net;
 
 class HttpResponse {
+	const HTTP_OK  = 200;
+	const HTTP_CREATED = 201;
 	private $statusCode;
 	private $data;
 	private $headers = array();

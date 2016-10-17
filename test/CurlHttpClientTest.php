@@ -1,6 +1,7 @@
 <?php
 use mharj\net\CurlHttpClient;
 use mharj\net\HttpRequest;
+use mharj\net\HttpResponse;
 use mharj\net\URL;
 
 class CurlHttpClientTest extends PHPUnit_Framework_TestCase {
@@ -16,6 +17,8 @@ class CurlHttpClientTest extends PHPUnit_Framework_TestCase {
 		$resp = $this->curl->sendRequest($req);
 		$this->assertEquals($resp->getUploadSize(),0);
 		$this->assertEquals($resp->getMethod(),"GET");
+		$this->assertEquals($resp->getStatusCode(), HttpResponse::HTTP_OK);
+		echo $resp->getStatusCode();
 		$obj = json_decode($resp->getData(),false);
 		$this->assertNotNull($obj);
 	}
@@ -27,6 +30,7 @@ class CurlHttpClientTest extends PHPUnit_Framework_TestCase {
 		$resp = $this->curl->sendRequest($req);
 		$this->assertEquals($resp->getUploadSize(),strlen($data));
 		$this->assertEquals($resp->getMethod(),"POST");
+		$this->assertEquals($resp->getStatusCode(), HttpResponse::HTTP_CREATED);
 		$obj = json_decode($resp->getData(),false);
 		$this->assertNotNull($obj);
 	}
@@ -38,6 +42,7 @@ class CurlHttpClientTest extends PHPUnit_Framework_TestCase {
 		$resp = $this->curl->sendRequest($req);
 		$this->assertEquals($resp->getUploadSize(),strlen($data));
 		$this->assertEquals($resp->getMethod(),"PUT");
+		$this->assertEquals($resp->getStatusCode(), HttpResponse::HTTP_OK);
 		$obj = json_decode($resp->getData(),false);
 		$this->assertNotNull($obj);
 	}	
@@ -49,6 +54,7 @@ class CurlHttpClientTest extends PHPUnit_Framework_TestCase {
 		$resp = $this->curl->sendRequest($req);
 		$this->assertEquals($resp->getUploadSize(),strlen($data));
 		$this->assertEquals($resp->getMethod(),"PATCH");
+		$this->assertEquals($resp->getStatusCode(), HttpResponse::HTTP_OK);
 		$obj = json_decode($resp->getData(),false);
 		$this->assertNotNull($obj);
 	}	
@@ -59,6 +65,7 @@ class CurlHttpClientTest extends PHPUnit_Framework_TestCase {
 		$resp = $this->curl->sendRequest($req);
 		$this->assertEquals($resp->getUploadSize(),0);
 		$this->assertEquals($resp->getMethod(),"DELETE");
+		$this->assertEquals($resp->getStatusCode(), HttpResponse::HTTP_OK);
 		$obj = json_decode($resp->getData(),false);
 		$this->assertNotNull($obj);
 	}		
