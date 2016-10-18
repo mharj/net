@@ -12,20 +12,31 @@ class CurlHttpClientTest extends PHPUnit_Framework_TestCase {
 		$this->curl->setProxyUrl("");
 	}
 	
+	public function testLocalhostWorking() {
+		$req = new HttpRequest(URL::create("http://localhost:8000/"));
+		$this->curl->sendRequest($req);
+	}
+
+	/**
+	 * @depends testLocalhostWorking
+	 */
 	public function testGet() {
-		$req = new HttpRequest(URL::create("https://jsonplaceholder.typicode.com/posts/1"));
+		$req = new HttpRequest(URL::create("http://localhost:8000/"));
+		
 		$resp = $this->curl->sendRequest($req);
 		$this->assertEquals($resp->getUploadSize(),0);
 		$this->assertEquals($resp->getMethod(),"GET");
 		$this->assertEquals($resp->getStatusCode(), HttpResponse::HTTP_OK);
-		echo $resp->getStatusCode();
 		$obj = json_decode($resp->getData(),false);
 		$this->assertNotNull($obj);
 	}
 	
+	/**
+	 * @depends testLocalhostWorking
+	 */	
 	public function testPost() {
 		$data = json_encode(array('title'=>'foo','body'=>'bar','userId'=>1));
-		$req = new HttpRequest(URL::create("https://jsonplaceholder.typicode.com/posts"),"POST",$data);
+		$req = new HttpRequest(URL::create("http://localhost:8000/"),"POST",$data);
 		
 		$resp = $this->curl->sendRequest($req);
 		$this->assertEquals($resp->getUploadSize(),strlen($data));
@@ -35,21 +46,27 @@ class CurlHttpClientTest extends PHPUnit_Framework_TestCase {
 		$this->assertNotNull($obj);
 	}
 	
+	/**
+	 * @depends testLocalhostWorking
+	 */	
 	public function testPut() {
 		$data = json_encode(array('id'=>1,'title'=>'foo','body'=>'bar','userId'=>1));
-		$req = new HttpRequest(URL::create("https://jsonplaceholder.typicode.com/posts/1"),"PUT",$data);
+		$req = new HttpRequest(URL::create("http://localhost:8000/"),"PUT",$data);
 		
 		$resp = $this->curl->sendRequest($req);
 		$this->assertEquals($resp->getUploadSize(),strlen($data));
 		$this->assertEquals($resp->getMethod(),"PUT");
-		$this->assertEquals($resp->getStatusCode(), HttpResponse::HTTP_OK);
+		$this->assertEquals($resp->getStatusCode(), HttpResponse::HTTP_ACCEPTED);
 		$obj = json_decode($resp->getData(),false);
 		$this->assertNotNull($obj);
 	}	
 
+	/**
+	 * @depends testLocalhostWorking
+	 */
 	public function testPatch() {
 		$data = json_encode(array('title'=>'foo'));
-		$req = new HttpRequest(URL::create("https://jsonplaceholder.typicode.com/posts/1"),"PATCH",$data);
+		$req = new HttpRequest(URL::create("http://localhost:8000/"),"PATCH",$data);
 		
 		$resp = $this->curl->sendRequest($req);
 		$this->assertEquals($resp->getUploadSize(),strlen($data));
@@ -57,10 +74,13 @@ class CurlHttpClientTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($resp->getStatusCode(), HttpResponse::HTTP_OK);
 		$obj = json_decode($resp->getData(),false);
 		$this->assertNotNull($obj);
-	}	
+	}
 	
+	/**
+	 * @depends testLocalhostWorking
+	 */
 	public function testDelete() {
-		$req = new HttpRequest(URL::create("https://jsonplaceholder.typicode.com/posts/1"),"DELETE");
+		$req = new HttpRequest(URL::create("http://localhost:8000/"),"DELETE");
 		
 		$resp = $this->curl->sendRequest($req);
 		$this->assertEquals($resp->getUploadSize(),0);
@@ -68,5 +88,24 @@ class CurlHttpClientTest extends PHPUnit_Framework_TestCase {
 		$this->assertEquals($resp->getStatusCode(), HttpResponse::HTTP_OK);
 		$obj = json_decode($resp->getData(),false);
 		$this->assertNotNull($obj);
-	}		
+	}	
+
+	
+	/**
+     * @depends testLocalhostWorking
+     */
+	public function testLocalServerResponseCodes() {
+		$responses = array(
+			HttpResponse::HTTP_OK,
+			HttpResponse::HTTP_CREATED,
+			HttpResponse::HTTP_BAD_REQUEST,
+			HttpResponse::HTTP_UNAUTHORIZED,
+			HttpResponse::HTTP_NOT_FOUND,
+		);
+		foreach ( $responses AS $response ) {
+			$req = new HttpRequest(URL::create("http://localhost:8000/?response=".$response));
+			$resp = $this->curl->sendRequest($req);
+			$this->assertEquals($resp->getStatusCode(),$response);
+		}
+	}
 }

@@ -8,6 +8,7 @@ class URL {
 	private $query;
 	private $fragment;
 	private $userInfo;
+	private $port=null;
 	
 	function __construct($scheme = null,$authority = null,$path = null,$query = null,$fragment = null) {
 		$this->scheme = $scheme;
@@ -41,8 +42,12 @@ class URL {
 		return $this->userInfo;
 	}
 	
+	function getPort() {
+		return $this->port;
+	}
+	
 	function toString() {
-		return ($this->scheme!=null?$this->scheme.'://':'').($this->userInfo!=null?$this->userInfo.'@':'').($this->authority!=null?$this->authority:'').($this->path!=null?$this->path:'').($this->query!=null?'?'.$this->query:'').($this->fragment!=null?'#'.$this->fragment:'');
+		return ($this->scheme!=null?$this->scheme.'://':'').($this->userInfo!=null?$this->userInfo.'@':'').($this->authority!=null?$this->authority:'').($this->port!=null?":".$this->port:"").($this->path!=null?$this->path:'').($this->query!=null?'?'.$this->query:'').($this->fragment!=null?'#'.$this->fragment:'');
 	}
 	
 	public static function create(string $uri) {
@@ -59,6 +64,9 @@ class URL {
 		if ( isset($data['host']) ) {
 			$this->authority = $data['host'];
 		}
+		if ( isset($data['port']) ) {
+			$this->port = $data['port'];
+		}		
 		if ( isset($data['user']) ) {
 			$this->userInfo = $data['user'].':'.$data['pass'];
 		}
