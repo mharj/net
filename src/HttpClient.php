@@ -14,7 +14,11 @@ abstract class HttpClient {
 		$this->timeOut = $timeOut;
 	}
 	
-	public function setProxyUrl(string $proxy) {
+	public function setProxySocket($proxy) {
+		if ( ! is_null($proxy) && ! is_string($proxy) && !$proxy instanceof InetSocketAddress ) {
+			throw new \TypeError("not instance of string or InetSocketAddress");
+		}
+
 		$this->proxy = $proxy;
 	}
 	

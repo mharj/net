@@ -9,7 +9,7 @@ class CurlHttpClientTest extends PHPUnit_Framework_TestCase {
 	
 	public function __construct() {
 		$this->curl = new CurlHttpClient();
-		$this->curl->setProxyUrl("");
+		$this->curl->setProxySocket("");
 	}
 	
 	public function testLocalhostWorking() {
