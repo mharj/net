@@ -8,6 +8,10 @@ class InetAddress {
 		$this->addr = $addr;
 	}
 	
+	public function equals($addr) {
+		return $this->addr == $addr;
+	}
+	
 	public function toString() {
 		return $this->addr;
 	}
