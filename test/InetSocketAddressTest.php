@@ -10,11 +10,11 @@ class InetSocketAddressTest extends PHPUnit_Framework_TestCase {
 		
 		$test = new InetSocketAddress("localhost",123);
 		$this->assertEquals($test->getPort(),123);
-		$this->assertEquals($test->getHost()->toString(),"localhost");
+		$this->assertEquals($test->getHost()->toString(),"127.0.0.1");
 		
-		$test = new InetSocketAddress(new InetAddress("localhost"),123);
+		$test = new InetSocketAddress(InetAddress::getByName("127.0.0.1"),123);
 		$this->assertEquals($test->getPort(),123);
-		$this->assertEquals($test->getHost()->toString(),"localhost");
+		$this->assertEquals($test->getHost()->toString(),"127.0.0.1");
 	}
 	
 	/**

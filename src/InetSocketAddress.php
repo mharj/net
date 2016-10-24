@@ -11,7 +11,7 @@ class InetSocketAddress {
 			throw new \TypeError("not instance of string or InetAddress");
 		}
 		if ( is_string($host) ) {
-			$host = new InetAddress($host);
+			$host = InetAddress::getByName($host);
 		}
  		$this->host = $host;
 		$this->port = $port;

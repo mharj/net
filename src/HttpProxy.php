@@ -8,10 +8,18 @@ class HttpProxy {
 	private $password;
 	private $exceptions = array();
 	
-	public function __construct(string $host,int $port=8080,array $exceptions=array()) {
+	public function __construct(string $host = null,int $port=8080,array $exceptions=array()) {
 		$this->host = $host;
 		$this->port = $port;
 		$this->setExceptions($exceptions);
+	}
+	
+	public function getHostname() {
+		return $this->host;
+	}
+	
+	public function getPort() {
+		return $this->port;
 	}
 	
 	public function setUsername($username) {
@@ -32,7 +40,7 @@ class HttpProxy {
 	
 	public function setExceptions(array $exceptions) {
 		foreach ( $exceptions AS $exception) {
-			if ( $exception instanceof InetAddress ) {
+			if ( is_string($exception) ) {
 				$this->exceptions[] = $exception;
 			}
 		}
@@ -40,7 +48,7 @@ class HttpProxy {
 	
 	public function isUsingProxy(URL $url): bool {
 		foreach ($this->exceptions as $exception) {
-			if ( $exception->equals( $url->getAuthority() ) ) {
+			if ( $exception == $url->getAuthority() ) {
 				return false;	
 			}
 		}

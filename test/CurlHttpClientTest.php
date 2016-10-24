@@ -2,6 +2,7 @@
 use mharj\net\CurlHttpClient;
 use mharj\net\HttpRequest;
 use mharj\net\HttpResponse;
+use mharj\net\HttpProxy;
 use mharj\net\URL;
 
 class CurlHttpClientTest extends PHPUnit_Framework_TestCase {
@@ -9,7 +10,7 @@ class CurlHttpClientTest extends PHPUnit_Framework_TestCase {
 	
 	public function __construct() {
 		$this->curl = new CurlHttpClient();
-		$this->curl->setProxySocket("");
+		$this->curl->setProxySocket(new HttpProxy(null));
 	}
 	
 	public function testLocalhostWorking() {

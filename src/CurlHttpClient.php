@@ -27,8 +27,10 @@ class CurlHttpClient extends HttpClient {
 		curl_setopt($this->ch, CURLOPT_URL, $req->getUrl()->toString() );
 		curl_setopt($this->ch, CURLOPT_CUSTOMREQUEST,$req->getMethod());
 		curl_setopt($this->ch, CURLOPT_HTTPHEADER,$req->getHeaders());
-		if ( $this->proxy !== null ) {
-			curl_setopt($this->ch, CURLOPT_PROXY, $this->proxy);
+		if ( $this->proxy === null || ! $this->proxy->isUsingProxy($req->getUrl()) ) {
+			curl_setopt($this->ch, CURLOPT_PROXY, "");
+		} else {
+			curl_setopt($this->ch, CURLOPT_PROXY, $this->proxy->getHostname().":".$this->proxy->getPort());
 		}
 		if ( $req->getMethod() != "POST" ) {
 			curl_setopt($this->ch, CURLOPT_POST, 0);
