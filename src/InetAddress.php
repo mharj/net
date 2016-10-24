@@ -31,6 +31,14 @@ class InetAddress {
 		return $this->getHostAddress();
 	}
 	
+	public static function getLocalHost() {
+		return InetAddress::getByName(gethostname());
+	}
+	
+	public static function getLoopbackAddress() {
+		return new InetAddress("127.0.0.1");
+	}
+	
 	public static function getAllByName(string $hostname) {
 		$data = array();
 		if ( function_exists("dns_get_record") && $hostname != "localhost" ) {

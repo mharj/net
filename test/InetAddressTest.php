@@ -10,7 +10,7 @@ class InetAddressTest extends PHPUnit_Framework_TestCase {
 		new InetAddress();
 	}
 	
-	public function testLocalhost() {
+	public function testSolving() {
 		$local = InetAddress::getByName("localhost");
 		$this->assertEquals($local,"127.0.0.1");
 		$local = InetAddress::getByName("192.168.1.2");
@@ -20,7 +20,19 @@ class InetAddressTest extends PHPUnit_Framework_TestCase {
 		$local = InetAddress::getByName("www.google.com");
 		$this->assertInstanceOf(InetAddress::class,$local);
 		$data = InetAddress::getAllByName("www.google.com");
-		$this->assertEquals(empty($data),false);
+		$this->assertEquals(empty($data),false);		
+		
+		
+	}
+
+	public function testLocalHost() {
+		$local = InetAddress::getLocalHost();
+		$this->assertInstanceOf(InetAddress::class,$local);
+	}
+	
+	public function testLoopbackAddress() {
+		$local = InetAddress::getLoopbackAddress();
+		$this->assertEquals($local,"127.0.0.1");
 	}
 	
 	/**
