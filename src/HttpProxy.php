@@ -4,8 +4,8 @@ namespace mharj\net;
 class HttpProxy {
 	private $host;
 	private $port;
-	private $username;
-	private $password;
+	private $username=null;
+	private $password=null;
 	private $exceptions = array();
 	
 	public function __construct(string $host = null,int $port=8080,array $exceptions=array()) {
