@@ -22,11 +22,13 @@ class InetAddress {
 	public function getHostName():string {
 		return gethostbyaddr($this->getHostAddress()); 
 	}
+	
 	public function getHostAddress():string {
 		return inet_ntop($this->addr);
 	}
-	public function toString() {
-		return inet_ntop($this->addr);
+	
+	public function __toString() {
+		return $this->getHostAddress();
 	}
 	
 	public static function getAllByName(string $hostname) {
@@ -41,9 +43,15 @@ class InetAddress {
 				}
 			}
 		} else {
-			foreach ( gethostbynamel($hostname) AS $ip ) {
-				$data[]=new InetAddress($ip);
+			$dns = gethostbynamel($hostname);
+			if ( $dns !== false ) {
+				foreach ( gethostbynamel($hostname) AS $ip ) {
+					$data[]=new InetAddress($ip);
+				}
 			}
+		}
+		if ( empty($data) ) {
+			throw new \TypeError("Can't solve address");
 		}
 		return $data;
 	}
