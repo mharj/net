@@ -2,23 +2,37 @@
 namespace mharj\net;
 
 class HttpProxy {
-	private $host;
+	private $host = null;
 	private $port;
-	private $username=null;
-	private $password=null;
+	private $username = null;
+	private $password = null;
 	private $exceptions = array();
 	
-	public function __construct(string $host = null,int $port=8080,array $exceptions=array()) {
-		$this->host = $host;
-		$this->port = $port;
-		$this->setExceptions($exceptions);
+	public function __construct($host = null,int $port=8080,array $exceptions=array()) {
+            if ( ! is_null($host) ) {
+                if ( is_string($host) ) {
+                    $this->host = InetAddress::getByName($host);
+                }
+                if ( $host instanceof InetAddress ) {
+                    $this->host = $host;
+                }
+                if ( is_null($this->host) ) {
+                    throw new \TypeError("not instance of string or InetAddress");
+                }
+            } 
+            $this->port = $port;
+            $this->setExceptions($exceptions);
 	}
 	
-	public function getHostname() {
-		return $this->host;
+        public function isNull(): bool {
+            return is_null($this->host);
+        }
+        
+	public function getHostname(): string {
+		return $this->host->getHostName();
 	}
 	
-	public function getPort() {
+	public function getPort(): int {
 		return $this->port;
 	}
 	
@@ -26,7 +40,7 @@ class HttpProxy {
 		$this->username = $username;
 	}
 	
-	public function getUsername() {
+	public function getUsername(): string {
 		return $this->username;
 	}
 	
@@ -34,7 +48,7 @@ class HttpProxy {
 		$this->password = $password;
 	} 
 	
-	public function getPassword() {
+	public function getPassword(): string {
 		return $this->password;
 	}
 	
