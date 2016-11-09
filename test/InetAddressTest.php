@@ -38,7 +38,6 @@ class InetAddressTest extends PHPUnit_Framework_TestCase {
 
 	public function testAnyAddress() {
 	    $local = InetAddress::getByName("0.0.0.0");
-		echo bin2hex($local->getAddress())."\n";
 		$this->assertEquals($local->isAnyLocalAddress(),true);
 	    $this->assertEquals($local,"0.0.0.0");
 	}

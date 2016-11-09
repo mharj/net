@@ -2,6 +2,7 @@
 
 use mharj\net\Socket;
 use mharj\net\InetAddress;
+use mharj\net\InetSocketAddress;
 
 class SocketTest extends PHPUnit_Framework_TestCase {
 	public function testSocketCons() {
@@ -13,7 +14,8 @@ class SocketTest extends PHPUnit_Framework_TestCase {
      */	
     public function testZeroSocket() {
         $socket = new Socket();
-        $this->assertEquals($socket->getLocalAddress(),"0.0.0.0");
+		$socket->bind();
+		$this->assertEquals($socket->getLocalAddress(),"0.0.0.0");
         $this->assertEquals(is_int($socket->getLocalPort()),true);
         $socket->close();
     }
@@ -27,7 +29,7 @@ class SocketTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals(is_int($socket->getLocalPort()),true);
         $socket->close();
     }
-
+	
     /**
      * Can't bind two same ports
      * @expectedException Exception

@@ -11,13 +11,32 @@ class Socket {
             throw new \Exception("socket support not enabled");
         }
         $this->socket = socket_create(AF_INET,SOCK_STREAM,SOL_TCP);
+		if ( $addr != null ) {
+			$this->bind(new InetSocketAddress($addr,$port));
+		}
+    }
+    
+	public function bind(InetSocketAddress $bindpoint = null) {
 		set_error_handler (function() { // get socket bind errors as Exception
 			throw new \Exception( socket_strerror( socket_last_error($this->socket) ) );
 		});
-		socket_bind($this->socket,(is_null($addr)?"0.0.0.0":$addr->getHostAddress()),$port);
-		restore_error_handler();
-    }
-    
+		if ( $bindpoint == null ) {
+			socket_bind($this->socket,"0.0.0.0");
+		} else {
+			socket_bind($this->socket,$bindpoint->getHost()->getHostAddress(),$bindpoint->getPort());
+		}
+		restore_error_handler();	
+	}
+	
+	public function connect(InetSocketAddress $target) {
+		echo "host: ".$target->getHost()->getHostAddress()."\n";
+		if ( socket_connect($this->socket,$target->getHost()->getHostAddress(),$target->getPort())) {
+			
+		} else {
+			
+		}
+	}
+	
     public function getLocalPort():int  {
         $name = "";
         $port = 0;
@@ -34,6 +53,10 @@ class Socket {
         } 
         throw new \Exception( socket_strerror( socket_last_error($this->socket) ) );
     }
+	
+	public function getLocalSocketAddress():InetSocketAddress {
+		return new InetSocketAddress($this->getLocalAddress(),$this->getLocalPort());
+	}
     
     public function close() {
         if ( ! is_null($this->socket) ) {
