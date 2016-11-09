@@ -14,7 +14,7 @@ class InetAddressTest extends PHPUnit_Framework_TestCase {
 	
 	public function testLocalHostSolve() {
 	    $local = InetAddress::getByName("localhost");
-	    $this->assertEquals($local,"127.0.0.1");
+	    $this->assertEquals($local->getHostAddress(),"127.0.0.1");
 	}
 	
 	public function testPrivNetworkIp() {
@@ -23,14 +23,14 @@ class InetAddressTest extends PHPUnit_Framework_TestCase {
 	}
 	
 	public function testIpv4Ip() {
-	    $local = InetAddress::getByAddress("127.0.0.1");
+	    $local = InetAddress::getByAddress(null,inet_pton("127.0.0.1"));
 	    $this->assertEquals($local,"127.0.0.1");
 		$this->assertEquals($local->isLoopbackAddress(),true);
 	    $this->assertInstanceOf(Inet4Address::class,$local);
 	}
 
 	public function testIpv6Ip() {
-	    $local = InetAddress::getByAddress("::1");
+	    $local = InetAddress::getByAddress(null,inet_pton("::1"));
 		$this->assertEquals($local->isLoopbackAddress(),true);
 	    $this->assertEquals($local,"::1");
 	    $this->assertInstanceOf(Inet6Address::class,$local);
@@ -38,8 +38,15 @@ class InetAddressTest extends PHPUnit_Framework_TestCase {
 
 	public function testAnyAddress() {
 	    $local = InetAddress::getByName("0.0.0.0");
+		echo bin2hex($local->getAddress())."\n";
 		$this->assertEquals($local->isAnyLocalAddress(),true);
 	    $this->assertEquals($local,"0.0.0.0");
+	}
+	
+	public function testAnyIpv6Address() {
+	    $local = InetAddress::getByName("::");
+		$this->assertEquals($local->isAnyLocalAddress(),true);
+	    $this->assertEquals($local,"::");
 	}
 	
 	public function testDnsSolving() {
@@ -49,7 +56,10 @@ class InetAddressTest extends PHPUnit_Framework_TestCase {
 
 	public function testDnsArraySolving() {
 	    $data = InetAddress::getAllByName("www.google.com");
-	    $this->assertEquals(empty($data),false);
+		$this->assertEquals(empty($data),false);
+		foreach( $data AS $e ) {
+			$this->assertEquals($e->getHostName(),"www.google.com");
+		}
 	}
 	
 	public function testLocalHost() {
@@ -59,9 +69,35 @@ class InetAddressTest extends PHPUnit_Framework_TestCase {
 	
 	public function testLoopbackAddress() {
 		$local = InetAddress::getLoopbackAddress();
-		$this->assertEquals($local,"127.0.0.1");
+		$this->assertEquals($local->getHostAddress(),"127.0.0.1");
 	}
 	
+	public function testLinkLocalAddress() {
+		$local = InetAddress::getByAddress(null,inet_pton("169.254.0.0"));
+		$this->assertEquals($local->isLinkLocalAddress(),true);
+	}
+	
+	public function testLinkLocal6Address() {
+		$local = InetAddress::getByAddress(null,inet_pton("fe80::2:3:a:bad:1dea:dad"));
+		$this->assertEquals($local->isLinkLocalAddress(),true);
+	}
+	
+	public function testSiteLocalAddress() {
+		$local = InetAddress::getByAddress(null,inet_pton("10.10.10.10"));
+		$this->assertEquals($local->isSiteLocalAddress(),true);
+		$local = InetAddress::getByAddress(null,inet_pton("172.16.20.30"));
+		$this->assertEquals($local->isSiteLocalAddress(),true);
+		$local = InetAddress::getByAddress(null,inet_pton("192.168.1.1"));
+		$this->assertEquals($local->isSiteLocalAddress(),true);
+		$local = InetAddress::getByAddress(null,inet_pton("216.58.209.110"));
+		$this->assertEquals($local->isSiteLocalAddress(),false);		
+	}
+	
+	public function testSiteLocal6Address() {
+		$local = InetAddress::getByAddress(null,inet_pton("fec0:0:0:0:ffff::1"));
+		$this->assertEquals($local->isSiteLocalAddress(),true);
+	}
+
 	/**
 	 * @expectedException TypeError
 	 */

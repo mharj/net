@@ -3,17 +3,9 @@ namespace mharj\net;
 
 class InetAddress {
 	protected $addr;
+	protected $hostName;
 	
-	protected function __construct(string $addr = null) {
-/*		
-		if ( $addr != null ) {
-			try {
-				$host = inet_pton($addr);
-				$this->addr = $host;
-			} catch( \Exception $ex) {
-				throw new \TypeError($ex->getMessage());
-			} 
-		}*/
+	protected function __construct() {
 	}
 	
 	public function equals($addr) {
@@ -21,11 +13,15 @@ class InetAddress {
 	}
 	
 	public function getHostName():string {
-		return gethostbyaddr($this->getHostAddress()); 
+		return $this->hostName;
+	}
+	
+	public function getAddress(): string {
+		return $this->addr;
 	}
 	
 	public function getHostAddress():string {
-		return inet_ntop($this->addr);
+		return InetAddress::getBytesToIp($this->addr);
 	}
 	
 	public static function getByAddress(string $host=null,$addr = null): InetAddress {
@@ -44,12 +40,12 @@ class InetAddress {
 		return $this->getHostAddress();
 	}
 	
-	public static function getLocalHost() {
+	public static function getLocalHost():InetAddress {
 		return InetAddress::getByName(gethostname());
 	}
 	
-	public static function getLoopbackAddress() {
-		return new InetAddress("127.0.0.1");
+	public static function getLoopbackAddress():InetAddress {
+		return self::getByAddress("localhost",InetAddress::getIpToBytes("127.0.0.1"));
 	}
 	
 	public static function getAllByName(string $hostname) {
@@ -57,17 +53,17 @@ class InetAddress {
 		if ( function_exists("dns_get_record") && $hostname != "localhost" ) {
 			foreach ( dns_get_record($hostname,DNS_ALL) AS $e) {
 				if ( isset($e['ip'])  ) {
-					$data[]=new InetAddress($e['ip']);
+					$data[] = new Inet4Address($hostname,InetAddress::getIpToBytes($e['ip']));
 				}
 				if ( isset($e['ipv6'])  ) {
-					$data[]=new InetAddress($e['ipv6']);
+					$data[] = new Inet6Address($hostname,InetAddress::getIpToBytes($e['ipv6']));
 				}
 			}
 		} else {
-			$dns = gethostbynamel($hostname);
+			$dns = gethostbynamel($hostname); // gets ipv4 only
 			if ( $dns !== false ) {
-				foreach ( gethostbynamel($hostname) AS $ip ) {
-					$data[]=new InetAddress($ip);
+				foreach ( $dns AS $ip ) {
+					$data[]=new Inet4Address($hostname,InetAddress::getIpToBytes($ip));
 				}
 			}
 		}
@@ -78,12 +74,24 @@ class InetAddress {
 	}
 	
 	public static function getByName(string $hostname) {
+		// give ANY address without dns lookup
+		if ( $hostname == "0.0.0.0" ) {
+			return Inet4Address::getAnyLocalAddress();
+		}
+		if ( $hostname == "::" ) {
+			return Inet6Address::getAnyLocalAddress();
+		}
+		// dns lookup
 		$data = null;
 		if ( function_exists("dns_get_record") && $hostname != "localhost" ) {
 			$data = self::lookUpFromDNS($hostname);
 		}
 		if ( $data == null ) {
-			$data = new Inet4Address( gethostbyname($hostname) );
+			try {
+				$data = new Inet4Address($hostname, InetAddress::getIpToBytes(gethostbyname($hostname)) );
+			} catch( \Exception $ex) {
+				throw new \TypeError("Can't solve address");
+			}
 		}
 		if ( $data == null || $data === false ) {
 			throw new \TypeError("Can't solve address");
@@ -98,25 +106,17 @@ class InetAddress {
 	public function isAnyLocalAddress(): bool {
 		return false;
 	}
-/*	
-	public static function getByAddress(string $ip): InetAddress {
-		$addr = "";
-		try {
-			$addr = inet_pton($ip);
-		} catch( \Exception $ex) {
-			throw new \TypeError($ex->getMessage());
-		}
-	    if ( strlen($addr) == Inet4Address::INADDRSZ ) {
-			return new Inet4Address($ip);
-	    }
-		if ( strlen($addr) == Inet6Address::INADDRSZ ) {
-			return new Inet6Address($ip);
-		}
+
+	public function isSiteLocalAddress(): bool {
+		return false;
 	}
-*/	
 	private static function lookUpFromDNS($addr) {
-		$data = dns_get_record($addr,DNS_ALL);
-		if ( $data === false ) {
+		try {
+			$data = dns_get_record($addr,DNS_ALL);
+			if ( $data === false ) {
+					throw new \TypeError("Can't solve address");
+			}
+		} catch( \Exception $ex) {
 			throw new \TypeError("Can't solve address");
 		}
 		if ( empty($data) ) {
@@ -124,12 +124,19 @@ class InetAddress {
 		}
 		foreach ( $data AS $e ) {
 			if ( isset($e['ip']) ) {
-				return new Inet4Address($e['ip']);
+				return new Inet4Address($addr,InetAddress::getIpToBytes($e['ip']));
 			}
 			if ( isset($e['ipv6']) ) {
-				return new Inet6Address($e['ipv6']);
+				return new Inet6Address($addr,InetAddress::getIpToBytes($e['ipv6']));
 			}
 		}
 		return null;
+	}
+	
+	protected static function getIpToBytes($ip): string {
+		return inet_pton($ip);
+	}
+	protected static function getBytesToIp($in_addr): string {
+		return inet_ntop($in_addr);
 	}
 }

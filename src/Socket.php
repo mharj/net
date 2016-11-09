@@ -11,11 +11,11 @@ class Socket {
             throw new \Exception("socket support not enabled");
         }
         $this->socket = socket_create(AF_INET,SOCK_STREAM,SOL_TCP);
-	set_error_handler (function() { // get socket bind errors as Exception
-	    throw new \Exception( socket_strerror( socket_last_error($this->socket) ) );
-	});
-	socket_bind($this->socket,(is_null($addr)?"0.0.0.0":$addr->getHostAddress()),$port);
-	restore_error_handler();
+		set_error_handler (function() { // get socket bind errors as Exception
+			throw new \Exception( socket_strerror( socket_last_error($this->socket) ) );
+		});
+		socket_bind($this->socket,(is_null($addr)?"0.0.0.0":$addr->getHostAddress()),$port);
+		restore_error_handler();
     }
     
     public function getLocalPort():int  {
