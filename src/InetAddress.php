@@ -2,9 +2,10 @@
 namespace mharj\net;
 
 class InetAddress {
-	private $addr;
+	protected $addr;
 	
-	private function __construct(string $addr = null) {
+	protected function __construct(string $addr = null) {
+/*		
 		if ( $addr != null ) {
 			try {
 				$host = inet_pton($addr);
@@ -12,7 +13,7 @@ class InetAddress {
 			} catch( \Exception $ex) {
 				throw new \TypeError($ex->getMessage());
 			} 
-		}
+		}*/
 	}
 	
 	public function equals($addr) {
@@ -26,6 +27,18 @@ class InetAddress {
 	public function getHostAddress():string {
 		return inet_ntop($this->addr);
 	}
+	
+	public static function getByAddress(string $host=null,$addr = null): InetAddress {
+		if ($addr != null) {
+			if (strlen($addr) == Inet4Address::INADDRSZ) {
+				return new Inet4Address($host, $addr);
+			} else if (strlen($addr) == Inet6Address::INADDRSZ ) {
+				return new Inet6Address($host, $addr);
+			}
+		}
+		throw new \TypeError("addr is of illegal length");
+	}
+	
 	
 	public function __toString() {
 		return $this->getHostAddress();
@@ -70,18 +83,37 @@ class InetAddress {
 			$data = self::lookUpFromDNS($hostname);
 		}
 		if ( $data == null ) {
-			$data = gethostbyname($hostname);
+			$data = new Inet4Address( gethostbyname($hostname) );
 		}
 		if ( $data == null || $data === false ) {
 			throw new \TypeError("Can't solve address");
 		}
-		return new InetAddress($data); 
+		return $data;
 	}
 	
-	public static function getByAddress(int $ip) {
-		return new InetAddress( long2ip($ip) );
-	}
+	public function isLoopbackAddress(): bool {
+        return false;
+    }
 	
+	public function isAnyLocalAddress(): bool {
+		return false;
+	}
+/*	
+	public static function getByAddress(string $ip): InetAddress {
+		$addr = "";
+		try {
+			$addr = inet_pton($ip);
+		} catch( \Exception $ex) {
+			throw new \TypeError($ex->getMessage());
+		}
+	    if ( strlen($addr) == Inet4Address::INADDRSZ ) {
+			return new Inet4Address($ip);
+	    }
+		if ( strlen($addr) == Inet6Address::INADDRSZ ) {
+			return new Inet6Address($ip);
+		}
+	}
+*/	
 	private static function lookUpFromDNS($addr) {
 		$data = dns_get_record($addr,DNS_ALL);
 		if ( $data === false ) {
@@ -92,10 +124,10 @@ class InetAddress {
 		}
 		foreach ( $data AS $e ) {
 			if ( isset($e['ip']) ) {
-				return $e['ip'];
+				return new Inet4Address($e['ip']);
 			}
 			if ( isset($e['ipv6']) ) {
-				return $e['ipv6'];
+				return new Inet6Address($e['ipv6']);
 			}
 		}
 		return null;
