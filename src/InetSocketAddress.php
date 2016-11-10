@@ -1,7 +1,7 @@
 <?php
 namespace mharj\net;
 
-class InetSocketAddress {
+class InetSocketAddress extends SocketAddress {
 	private $port;
 	private $host;
 	
